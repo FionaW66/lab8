@@ -1,7 +1,7 @@
 ---
 title: "Lab 08 - University of Edinburgh Art Collection"
-author: "Insert your name here"
-date: "Insert date here"
+author: "Fiona Wang"
+date: "03-04-2025"
 output: github_document
 ---
 
@@ -12,12 +12,13 @@ First, let's load the necessary packages:
 ```{r load-packages, message = FALSE}
 library(tidyverse) 
 library(skimr)
+library(scales)
 ```
 
 Now, load the dataset. If your data isn't ready yet, you can leave `eval = FALSE` for now and update it when needed.  
 
 
-```{r load-data, message = FALSE, eval = FALSE}
+```{r load-data, message = FALSE}
 # Remove eval = FALSE or set it to TRUE once data is ready to be loaded
 uoe_art <- read_csv("data/uoe-art.csv")
 ```
@@ -29,28 +30,33 @@ Let's start working with the **title** column by separating the title and the da
 ```{r separate-title-date, error = TRUE}
 uoe_art <- uoe_art %>%
   separate(title, into = c("title", "date"), sep = "\\(") %>%
-  mutate(year = str_remove(date, "\\)") %>% as.numeric()) %>%
-  select(title, artist, year, ___)  # Fill in the missing variable!
+  mutate(year = str_remove(date, "\\)") %>% as.numeric()) %>% 
+  select(title, artist, year, link)  # Fill in the missing variable!
 ```
 
-Make sure to replace `___` with the appropriate column name.  
-
+The warning message means that R didn't identify a ")" in the title, so they put NA in the year column for those instances.      
+Some had month info which we don't need. Using the as.numeric changed those instances to NAs. We lost some information in this process. 
 
 ## Exercise 10  
+```{r artistunknown}
+uoe_art <- uoe_art %>% 
+  mutate(artist = ifelse(artist == "Unknown", NA, artist))
+```
 
-*Write your answer here.*  
-
-Feel free to add code chunks as needed. Don't forget to label your code chunk.
-
+Here, I changed the artist column. I observed that a lot of artists are unknown, but they are written as unknown and not NA. I changed them into NAs, so that the next question will have a more accurate answer. 
 
 ## Exercise 11  
+```{r}
+skim(uoe_art)
+```
+We are missing 484 pieces of artist info. We are missing 1580 pieces of year info. 
 
+## Exercise 12
+```{r}
+uoe_art %>% 
+  ggplot(aes(x = year)) +
+  geom_histogram(binwidth = 5) +
+  scale_x_continuous(limits = c(1800, 2025))
+```
 
-*Continue with the same structure as above.*
-
-You're doing great—keep going! Follow the same format and add your response below.  
-
-
-## Additional Exercises  
-
-Almost there! Keep building on your work and follow the same structure for any remaining exercises. Each exercise builds on the last, so take your time and make sure your code is working as expected.  
+I don't see anything unusual. 

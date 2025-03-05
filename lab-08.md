@@ -1,7 +1,7 @@
 Lab 08 - University of Edinburgh Art Collection
 ================
-Insert your name here
-Insert date here
+Fiona Wang
+03-04-2025
 
 ## Load Packages and Data
 
@@ -10,6 +10,7 @@ First, let’s load the necessary packages:
 ``` r
 library(tidyverse) 
 library(skimr)
+library(scales)
 ```
 
 Now, load the dataset. If your data isn’t ready yet, you can leave
@@ -28,33 +29,90 @@ and the date:
 ``` r
 uoe_art <- uoe_art %>%
   separate(title, into = c("title", "date"), sep = "\\(") %>%
-  mutate(year = str_remove(date, "\\)") %>% as.numeric()) %>%
-  select(title, artist, year, ___)  # Fill in the missing variable!
+  mutate(year = str_remove(date, "\\)") %>% as.numeric()) %>% 
+  select(title, artist, year, link)  # Fill in the missing variable!
 ```
 
-    ## Error in parse(text = input): <text>:4:32: unexpected input
-    ## 3:   mutate(year = str_remove(date, "\\)") %>% as.numeric()) %>%
-    ## 4:   select(title, artist, year, __
-    ##                                   ^
+    ## Warning: Expected 2 pieces. Additional pieces discarded in 47 rows [16, 266, 459, 461,
+    ## 508, 525, 564, 575, 592, 808, 873, 878, 920, 927, 1006, 1090, 1143, 1154, 1194,
+    ## 1209, ...].
 
-Make sure to replace `___` with the appropriate column name.
+    ## Warning: Expected 2 pieces. Missing pieces filled with `NA` in 697 rows [7, 11, 12, 14,
+    ## 25, 28, 38, 40, 43, 46, 50, 57, 58, 62, 64, 65, 67, 91, 95, 96, ...].
+
+    ## Warning: There was 1 warning in `mutate()`.
+    ## ℹ In argument: `year = str_remove(date, "\\)") %>% as.numeric()`.
+    ## Caused by warning in `str_remove(date, "\\)") %>% as.numeric()`:
+    ## ! NAs introduced by coercion
+
+The warning message means that R didn’t identify a “)” in the title, so
+they put NA in the year column for those instances.  
+Some had month info which we don’t need. Using the as.numeric changed
+those instances to NAs. We lost some information in this process.
 
 ## Exercise 10
 
-*Write your answer here.*
+``` r
+uoe_art <- uoe_art %>% 
+  mutate(artist = ifelse(artist == "Unknown", NA, artist))
+```
 
-Feel free to add code chunks as needed. Don’t forget to label your code
-chunk.
+Here, I changed the artist column. I observed that a lot of artists are
+unknown, but they are written as unknown and not NA. I changed them into
+NAs, so that the next question will have a more accurate answer.
 
 ## Exercise 11
 
-*Continue with the same structure as above.*
+``` r
+skim(uoe_art)
+```
 
-You’re doing great—keep going! Follow the same format and add your
-response below.
+|                                                  |         |
+|:-------------------------------------------------|:--------|
+| Name                                             | uoe_art |
+| Number of rows                                   | 3312    |
+| Number of columns                                | 4       |
+| \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_   |         |
+| Column type frequency:                           |         |
+| character                                        | 3       |
+| numeric                                          | 1       |
+| \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ |         |
+| Group variables                                  | None    |
 
-## Additional Exercises
+Data summary
 
-Almost there! Keep building on your work and follow the same structure
-for any remaining exercises. Each exercise builds on the last, so take
-your time and make sure your code is working as expected.
+**Variable type: character**
+
+| skim_variable | n_missing | complete_rate | min | max | empty | n_unique | whitespace |
+|:--------------|----------:|--------------:|----:|----:|------:|---------:|-----------:|
+| title         |         0 |          1.00 |   0 |  95 |     5 |     1629 |          0 |
+| artist        |       484 |          0.85 |   2 |  55 |     0 |     1197 |          0 |
+| link          |         0 |          1.00 |  57 |  60 |     0 |     3312 |          0 |
+
+**Variable type: numeric**
+
+| skim_variable | n_missing | complete_rate |    mean |    sd |  p0 |  p25 |  p50 |  p75 | p100 | hist  |
+|:--------------|----------:|--------------:|--------:|------:|----:|-----:|-----:|-----:|-----:|:------|
+| year          |      1580 |          0.52 | 1964.56 | 53.22 |   2 | 1953 | 1962 | 1977 | 2020 | ▁▁▁▁▇ |
+
+We are missing 484 pieces of artist info. We are missing 1580 pieces of
+year info.
+
+## Exercise 12
+
+``` r
+uoe_art %>% 
+  ggplot(aes(x = year)) +
+  geom_histogram(binwidth = 5) +
+  scale_x_continuous(limits = c(1800, 2025))
+```
+
+    ## Warning: Removed 1581 rows containing non-finite outside the scale range
+    ## (`stat_bin()`).
+
+    ## Warning: Removed 2 rows containing missing values or values outside the scale range
+    ## (`geom_bar()`).
+
+![](lab-08_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
+
+I don’t see anything unusual.
