@@ -103,16 +103,94 @@ year info.
 ``` r
 uoe_art %>% 
   ggplot(aes(x = year)) +
-  geom_histogram(binwidth = 5) +
-  scale_x_continuous(limits = c(1800, 2025))
+  geom_histogram(binwidth = 1) 
 ```
 
-    ## Warning: Removed 1581 rows containing non-finite outside the scale range
+    ## Warning: Removed 1580 rows containing non-finite outside the scale range
     ## (`stat_bin()`).
 
-    ## Warning: Removed 2 rows containing missing values or values outside the scale range
-    ## (`geom_bar()`).
+![](lab-08_files/figure-gfm/plot-1.png)<!-- -->
 
-![](lab-08_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
+To be honest, I didn’t see anything unusual at first. Later, when
+scrolling through the data frame, I realized that there is something
+unusual. There is a year which is close to zero. On the graph here, it’s
+almost invisible.
 
-I don’t see anything unusual.
+## Exercise 13
+
+``` r
+unusual <- uoe_art %>% 
+  filter(year < 500)
+```
+
+We found the outlier. It is published in the year 2. Looking it up
+online, the correct year is actually 1964. The title is Death Mask(2),
+this parentheses is the reason why R coded this piece as year 2.
+
+``` r
+uoe_art <- uoe_art %>% 
+  mutate(year = case_when(
+    year == 2 ~ 1964,
+    TRUE ~ year
+  ))
+```
+
+``` r
+uoe_art %>% 
+  ggplot(aes(x = year)) +
+  geom_histogram(binwidth = 1)
+```
+
+![](lab-08_files/figure-gfm/plotagain-1.png)<!-- -->
+
+## Exercise 14
+
+``` r
+uoe_art %>% 
+  count(artist) %>% 
+  arrange(desc(n))
+```
+
+    ## # A tibble: 1,198 × 2
+    ##    artist                n
+    ##    <chr>             <int>
+    ##  1 <NA>                484
+    ##  2 Emma Gillies        175
+    ##  3 Ann F Ward           23
+    ##  4 John Bellany         22
+    ##  5 Zygmunt Bukowski     21
+    ##  6 Boris Bućan          17
+    ##  7 Marjorie Wallace     17
+    ##  8 Gordon Bryce         16
+    ##  9 William Gillon       16
+    ## 10 Alan M. Alexander    14
+    ## # ℹ 1,188 more rows
+
+Apart from NAs, Emma Gillies appears the most commonly featured artist
+in the collection. I don’t know this person. The way that the question
+is asked, I would guess that this person is a professor or previous
+student from this university.
+
+## Exercise 15
+
+``` r
+uoe_art %>% 
+  filter(str_detect(title, "child|Child"))
+```
+
+    ## # A tibble: 11 × 4
+    ##    title                                                      artist  year link 
+    ##    <chr>                                                      <chr>  <dbl> <chr>
+    ##  1 "Untitled - Children Playing "                             Monik…  1963 http…
+    ##  2 "Virgin and Child"                                         <NA>      NA http…
+    ##  3 "Virgin and Child "                                        <NA>      NA http…
+    ##  4 "Woman with Child and Still Life "                         Cathe…  1938 http…
+    ##  5 "The Children's Hour "                                     Eduar…    NA http…
+    ##  6 "Virgin and Child "                                        <NA>      NA http…
+    ##  7 "Child's collar. Chinese"                                  <NA>      NA http…
+    ##  8 "Child's chinese headdress"                                <NA>      NA http…
+    ##  9 "Figure Composition with Nurse and Child, and Woman with … Edwar…    NA http…
+    ## 10 "The Sun Dissolves while Man Looks Away from the Unborn C… Eduar…    NA http…
+    ## 11 "Untitled - Portrait of a Woman and Child "                Willi…    NA http…
+
+There are 11 pieces that have the word “child” in their title.

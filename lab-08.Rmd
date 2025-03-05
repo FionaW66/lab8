@@ -46,17 +46,53 @@ uoe_art <- uoe_art %>%
 Here, I changed the artist column. I observed that a lot of artists are unknown, but they are written as unknown and not NA. I changed them into NAs, so that the next question will have a more accurate answer. 
 
 ## Exercise 11  
-```{r}
+```{r skim}
 skim(uoe_art)
 ```
 We are missing 484 pieces of artist info. We are missing 1580 pieces of year info. 
 
 ## Exercise 12
-```{r}
+```{r plot}
 uoe_art %>% 
   ggplot(aes(x = year)) +
-  geom_histogram(binwidth = 5) +
-  scale_x_continuous(limits = c(1800, 2025))
+  geom_histogram(binwidth = 1) 
 ```
 
-I don't see anything unusual. 
+To be honest, I didn't see anything unusual at first. Later, when scrolling through the data frame, I realized that there is something unusual. There is a year which is close to zero. On the graph here, it's almost invisible. 
+
+## Exercise 13
+```{r findunusual}
+unusual <- uoe_art %>% 
+  filter(year < 500)
+```
+We found the outlier. It is published in the year 2. Looking it up online, the correct year is actually 1964. The title is Death Mask(2), this parentheses is the reason why R coded this piece as year 2. 
+
+```{r correction}
+uoe_art <- uoe_art %>% 
+  mutate(year = case_when(
+    year == 2 ~ 1964,
+    TRUE ~ year
+  ))
+```
+```{r plotagain, warning = FALSE}
+uoe_art %>% 
+  ggplot(aes(x = year)) +
+  geom_histogram(binwidth = 1)
+```
+
+## Exercise 14
+```{r top1artist}
+uoe_art %>% 
+  count(artist) %>% 
+  arrange(desc(n))
+```
+
+Apart from NAs, Emma Gillies appears the most commonly featured artist in the collection. I don't know this person. The way that the question is asked, I would guess that this person is a professor or previous student from this university. 
+
+## Exercise 15
+```{r child}
+uoe_art %>% 
+  filter(str_detect(title, "child|Child"))
+```
+
+There are 11 pieces that have the word "child" in their title. 
